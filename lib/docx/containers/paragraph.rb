@@ -51,14 +51,9 @@ module Docx
           styles['text-align'] = alignment if alignment
           styles['color'] = "##{color}" if color
           if l_id = list_id
-            list_start = @document_properties[:lists][l_id.to_s].to_i + 1
-            @document_properties[:lists][l_id.to_s] = list_start
-            html_tag(:ol,
-                     content: html_tag(:li,
-                                       content: html,
-                                       styles: styles),
-                     styles: {margin: '2px'},
-                     attributes: "start=#{list_start}")
+            list_idx = @document_properties[:lists][l_id.to_s].to_i + 1
+            @document_properties[:lists][l_id.to_s] = list_idx
+            html_tag(:p, content: "#{list_idx}. #{html}", styles: styles.merge('margin-top': '8px'))
           else
             html_tag(:p, content: html, styles: styles)
           end
