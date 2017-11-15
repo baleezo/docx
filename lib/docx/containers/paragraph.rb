@@ -49,13 +49,24 @@ module Docx
           end
           styles = { 'font-size' => "#{font_size}pt" }
           styles['text-align'] = alignment if alignment
-          html_tag(:p, content: html, styles: styles)
+          styles['color'] = "##{color}" if color
+          if l_id = list_id
+            list_start = @document_properties[:lists][l_id.to_s].to_i + 1
+            @document_properties[:lists][l_id.to_s] = list_start
+            html_tag(:ol,
+                     content: html_tag(:li,
+                                       content: html,
+                                       styles: styles),
+                     styles: {margin: '2px'},
+                     attributes: "start=#{list_start}")
+          else
+            html_tag(:p, content: html, styles: styles)
+          end
         end
-
 
         # Array of text runs contained within paragraph
         def text_runs
-          @node.xpath('w:r|w:hyperlink/w:r').map { |r_node| Containers::TextRun.new(r_node, @document_properties) }
+          @node.xpath('w:r|w:hyperlink/w:r|w:ins/w:r').map { |r_node| Containers::TextRun.new(r_node, @document_properties) }
         end
 
         # Iterate over each text run within a paragraph
@@ -88,6 +99,16 @@ module Docx
         def alignment
           alignment_tag = @node.xpath('.//w:jc').first
           alignment_tag ? alignment_tag.attributes['val'].value : nil
+        end
+
+        def list_id
+          list_tag = @node.xpath('w:pPr//w:numPr//w:numId').first
+          list_tag ? list_tag.attributes['val'].value : nil
+        end
+
+        def color
+          color_tag = @node.xpath('w:pPr//w:color').first
+          color_tag ? color_tag.attributes['val'].value : nil
         end
 
       end

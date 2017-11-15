@@ -27,6 +27,10 @@ module Docx
       @doc = Nokogiri::XML(@document_xml)
       @styles_xml = @zip.read('word/styles.xml')
       @styles = Nokogiri::XML(@styles_xml)
+      @ducument_properties = {
+        font_size: font_size,
+        lists: {}
+      }
       if block_given?
         yield self
         @zip.close
@@ -36,9 +40,7 @@ module Docx
 
     # This stores the current global document properties, for now
     def document_properties
-      {
-        font_size: font_size
-      }
+      @ducument_properties
     end
 
 
